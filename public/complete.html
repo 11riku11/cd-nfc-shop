@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>注文完了 - CD型NFCキーホルダー</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>CD型NFCキーホルダー専門店</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">トップ</a></li>
+        <li><a href="preview.html">デザインプレビュー</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="order-complete">
+      <h2>ご注文ありがとうございます！</h2>
+      <p>注文番号：<strong>#<span id="order-id"></span></strong></p>
+      <p>メールで詳細をお送りしました。</p>
+      <a href="index.html" class="btn">トップに戻る</a>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 CD NFC キーホルダー専門店</p>
+  </footer>
+
+  <script>
+    // 注文番号表示
+    const params = new URLSearchParams(location.search);
+    const orderId = params.get('orderId');
+    document.getElementById('order-id').textContent = orderId || '—';
+
+    // 保存処理（画像 + URL）
+    if (orderId) {
+      const data = {
+        sessionId: orderId,
+        musicURL: localStorage.getItem('musicURL'),
+        coverImage: localStorage.getItem('coverImage'),
+        bookletImage: localStorage.getItem('bookletImage'),
+        discImage: localStorage.getItem('discImage'),
+        backImage: localStorage.getItem('backImage'),
+        spineImage: localStorage.getItem('spineImage'),
+      };
+
+      fetch('/save-images', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      .then(res => res.json())
+      .then(json => {
+        console.log('✅ 画像保存結果:', json);
+        // 完了後にlocalStorageクリアしてもOK（任意）
+        // localStorage.clear();
+      })
+      .catch(err => {
+        console.error('❌ 画像送信エラー:', err);
+      });
+    }
+  </script>
+</body>
+</html>

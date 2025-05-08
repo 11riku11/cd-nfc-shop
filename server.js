@@ -1,19 +1,34 @@
 // server.js
 
-require('dotenv').config();
-
-const express = require('express');
-const app = express();
+// ── 環境変数読み込み＆デバッグ ──
 const path = require('path');
+const dotenvResult = require('dotenv').config({
+  path: path.resolve(__dirname, '.env'),
+  debug: true
+});
+if (dotenvResult.error) {
+  console.error('❌ dotenv load error:', dotenvResult.error);
+} else {
+  console.log('✅ dotenv parsed keys:', dotenvResult.parsed);
+}
+console.log('Working dir:', process.cwd());
+console.log('__dirname:', __dirname);
+console.log('STRIPE_SECRET_KEY:', process.env.STRIPE_SECRET_KEY ? '○OK' : '×NG');
+
+// ── モジュール読み込み ──
+const express = require('express');
 const fs = require('fs');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const bodyParser = require('body-parser');
+
+// ── Express アプリ初期化 ──
+const app = express();
 
 // ── 静的ファイル公開 ──
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// ✅ 追加: ルートで index.html を返す
+// ── ルートで index.html を返す ──
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -80,8 +95,6 @@ app.post('/create-checkout-session', async (req, res) => {
 // ── 画像保存エンドポイント ──
 app.post('/save-images', async (req, res) => {
   const {
-    sessionId,
-    musicURL,
     email,
     coverImage,
     bookletImage,

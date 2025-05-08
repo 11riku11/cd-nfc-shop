@@ -1,4 +1,7 @@
+// server.js
+
 require('dotenv').config();
+
 const express = require('express');
 const app = express();
 const path = require('path');
@@ -6,36 +9,49 @@ const fs = require('fs');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const bodyParser = require('body-parser');
 
-// ✅ 静的ファイル
+// ── 静的ファイル公開 ──
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// ✅ Stripe Webhook（rawボディで処理）
-app.post('/webhook', bodyParser.raw({ type: 'application/json' }), (req, res) => {
-  const sig = req.headers['stripe-signature'];
-  let event;
-
-  try {
-    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-    console.log('✅ Webhookイベントタイプ:', event.type);
-  } catch (err) {
-    console.error('❌ Webhook署名検証失敗:', err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-
-  if (event.type === 'checkout.session.completed') {
-    const meta = event.data.object.metadata;
-    console.log('✅ 決済完了: Session ID:', event.data.object.id);
-    console.log('🎵 Music URL:', meta.musicURL);
-  }
-
-  res.sendStatus(200);
+// ✅ 追加: ルートで index.html を返す
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ✅ JSONパーサー（Webhookの後に）
+// ── Stripe Webhook エンドポイント ──
+app.post(
+  '/webhook',
+  bodyParser.raw({ type: 'application/json' }),
+  (req, res) => {
+    const sig = req.headers['stripe-signature'];
+    let event;
+
+    try {
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        process.env.STRIPE_WEBHOOK_SECRET
+      );
+      console.log('✅ Webhookイベントタイプ:', event.type);
+    } catch (err) {
+      console.error('❌ Webhook署名検証失敗:', err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    if (event.type === 'checkout.session.completed') {
+      const meta = event.data.object.metadata;
+      console.log('✅ 決済完了: Session ID:', event.data.object.id);
+      console.log('🎵 Music URL:', meta.musicURL);
+    }
+
+    res.sendStatus(200);
+  }
+);
+
+// ── JSON パーサー（その他の POST 用） ──
 app.use(express.json({ limit: '20mb' }));
 
-// ✅ Stripe Checkout セッション作成
+// ── Checkout Session 作成エンドポイント ──
 app.post('/create-checkout-session', async (req, res) => {
   const { quantity, musicURL } = req.body;
 
@@ -53,9 +69,7 @@ app.post('/create-checkout-session', async (req, res) => {
       mode: 'payment',
       success_url: `${req.headers.origin}/complete.html?orderId={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.origin}/purchase.html`,
-      metadata: {
-        musicURL
-      }
+      metadata: { musicURL }
     });
     res.json({ id: session.id });
   } catch (err) {
@@ -63,7 +77,7 @@ app.post('/create-checkout-session', async (req, res) => {
   }
 });
 
-// ✅ 画像保存（メール＋日時をフォルダ名に）
+// ── 画像保存エンドポイント ──
 app.post('/save-images', async (req, res) => {
   const {
     sessionId,
@@ -80,10 +94,13 @@ app.post('/save-images', async (req, res) => {
     return res.status(400).json({ error: 'メールアドレスが必要です' });
   }
 
-  // フォルダ名をメール + タイムスタンプで生成
+  // メールアドレス＋タイムスタンプでフォルダ名を生成
   const sanitizedEmail = email.replace(/[@.]/g, '_');
   const now = new Date();
-  const timestamp = now.toISOString().replace(/[-:]/g, '').split('.')[0]; // 20250504T184512
+  const timestamp = now
+    .toISOString()
+    .replace(/[-:]/g, '')
+    .split('.')[0]; // ex. 20250507T234512
   const folderName = `${sanitizedEmail}_${timestamp}`;
   const dir = path.join(__dirname, 'uploads', folderName);
 
@@ -110,7 +127,7 @@ app.post('/save-images', async (req, res) => {
   }
 });
 
-// ✅ 起動
+// ── サーバ起動 ──
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);

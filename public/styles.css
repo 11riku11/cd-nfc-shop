@@ -215,3 +215,93 @@ input[type="url"] {
     text-align: center;
   }
 }
+
+/* Terms, Privacy, Commerce Pages */
+dl {
+  width: 90%;
+  max-width: 800px;
+  margin: 0 auto 32px;
+}
+dl dt {
+  font-weight: bold;
+  margin-top: 16px;
+  color: #222;
+}
+dl dd {
+  margin: 4px 0 12px 0;
+  padding-left: 16px;
+  color: #555;
+}
+ul, ol {
+  margin: 0 0 24px 20px;
+  color: #444;
+}
+h2 {
+  margin-top: 24px;
+  margin-bottom: 12px;
+  font-size: 1.6rem;
+  color: #222;
+}
+a {
+  color: #007bff;
+  transition: color 0.2s;
+}
+a:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+/* Complete Page Address Input */
+.address-input {
+  margin: 24px auto;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.address-input label {
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #333;
+}
+.address-input textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  resize: vertical;
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+#save-btn {
+  align-self: center;
+  background: #28a745;
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+#save-btn:hover {
+  background: #218838;
+}
+
+/* Footer Navigation Links */
+.footer-nav {
+  margin-top: 16px;
+  font-size: 0.9rem;
+}
+.footer-nav a {
+  color: #ccc;
+  margin: 0 8px;
+}
+.footer-nav a:hover {
+  color: #fff;
+}
+
+/* Order Complete Section */
+.order-complete {
+  text-align: center;
+  padding: 24px;
+}
+.order-complete .btn {
+  margin-top: 16px;
+}

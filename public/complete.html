@@ -22,6 +22,14 @@
       <h2>ご注文ありがとうございます！</h2>
       <p>注文番号：<strong>#<span id="order-id"></span></strong></p>
       <p>メールで詳細をお送りしました。</p>
+
+      <!-- 追加：発送先住所入力フォーム -->
+      <div class="address-input">
+        <label for="address">発送先住所をご入力ください：</label>
+        <textarea id="address" rows="3" placeholder="例：東京都渋谷区〇〇町1-2-3"></textarea>
+        <button id="save-btn" class="btn">住所を保存して完了</button>
+      </div>
+
       <a href="index.html" class="btn">トップに戻る</a>
     </section>
   </main>
@@ -36,8 +44,15 @@
     const orderId = params.get('orderId');
     document.getElementById('order-id').textContent = orderId || '—';
 
-    // 保存処理（画像 + URL）
-    if (orderId) {
+    const saveButton = document.getElementById('save-btn');
+    saveButton.addEventListener('click', () => {
+      const address = document.getElementById('address').value.trim();
+      if (!address) {
+        alert('発送先住所を入力してください');
+        return;
+      }
+
+      // 保存データ
       const data = {
         sessionId: orderId,
         musicURL: localStorage.getItem('musicURL'),
@@ -46,6 +61,7 @@
         discImage: localStorage.getItem('discImage'),
         backImage: localStorage.getItem('backImage'),
         spineImage: localStorage.getItem('spineImage'),
+        address: address
       };
 
       fetch('/save-images', {
@@ -55,14 +71,16 @@
       })
       .then(res => res.json())
       .then(json => {
-        console.log('✅ 画像保存結果:', json);
-        // 完了後にlocalStorageクリアしてもOK（任意）
+        console.log('✅ 保存結果:', json);
+        alert('ご住所とデザインを保存しました！');
+        // 任意で localStorage をクリア
         // localStorage.clear();
       })
       .catch(err => {
-        console.error('❌ 画像送信エラー:', err);
+        console.error('❌ 保存エラー:', err);
+        alert('保存に失敗しました。再度お試しください。');
       });
-    }
+    });
   </script>
 </body>
 </html>

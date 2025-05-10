@@ -6,6 +6,7 @@
   <title>購入ページ - CD型NFCキーホルダー</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://js.stripe.com/v3/"></script>
+  <link rel="icon" href="logo.png" type="image/png">
 </head>
 <body>
   <header>
@@ -52,7 +53,7 @@
       </div>
       <div class="details">
         <p>商品名：CD型NFCキーホルダー</p>
-        <p>単価：¥2,500</p>
+        <p>単価：¥3,300</p>
         <label for="quantity">数量：</label>
         <select id="quantity" name="quantity">
           <option value="1">1</option>
@@ -61,7 +62,7 @@
           <option value="4">4</option>
           <option value="5">5</option>
         </select>
-        <p>小計：¥<span id="subtotal">2500</span></p>
+        <p>小計：¥<span id="subtotal">3300</span></p>
       </div>
     </section>
 
@@ -81,42 +82,51 @@
 
   <footer>
     <p>&copy; 2025 CD NFC キーホルダー専門店</p>
+    <nav class="footer-nav">
+      <a href="terms.html">利用規約</a>｜
+      <a href="privacy.html">プライバシーポリシー</a>｜
+      <a href="commerce.html">特定商取引法表記</a>
+    </nav>
   </footer>
 
   <script>
-    const stripe = Stripe('pk_test_51RKbkfFzqvisLNqWBdRNgEX9XILAEEd7fFPq3ibiZFr4Gn1lMfmMvf0BigoM2t6o1ilK5RwQldOSZVFIJI5PvFpP00wrshOCVp');
-    const unitPrice = 2500;
+    const stripe = Stripe('pk_live_…'); // 必要に応じて公開キーを本番キーに更新
+    const unitPrice = 3300;
 
+    // 数量変更で小計を更新
     document.getElementById('quantity').addEventListener('change', e => {
       document.getElementById('subtotal').textContent = unitPrice * e.target.value;
     });
 
+    // プレビュー画像とURLを復元
     ['cover','booklet','disc','back','spine'].forEach(part => {
-      const img = document.getElementById(part + '-preview');
-      img.src = localStorage.getItem(part + 'Image') || '';
+      const img = document.getElementById(`${part}-preview`);
+      if (img) img.src = localStorage.getItem(`${part}Image`) || '';
     });
     document.getElementById('music-url-input').value = localStorage.getItem('musicURL') || '';
 
+    // フォーム送信ハンドラ
     document.getElementById('order-form').addEventListener('submit', async e => {
       e.preventDefault();
-      const qty = document.getElementById('quantity').value;
-      const musicURL = document.getElementById('music-url-input').value;
+      const form = e.target;
+      const data = {
+        quantity:  form.quantity.value,
+        musicURL:  form.musicURL.value
+      };
 
-      // ✅ ここで localStorage に保存（complete.html で使うため）
-      localStorage.setItem('musicURL', musicURL);
+      // 顧客情報を localStorage に保存
+      localStorage.setItem('email',   form.email.value);
+      localStorage.setItem('name',    form.name.value);
+      localStorage.setItem('postal',  form.postal.value);
+      localStorage.setItem('address', form.address.value);
+      localStorage.setItem('musicURL', form.musicURL.value);
 
-      const discImage     = localStorage.getItem('discImage');
-      const coverImage    = localStorage.getItem('coverImage');
-      const bookletImage  = localStorage.getItem('bookletImage');
-      const backImage     = localStorage.getItem('backImage');
-      const spineImage    = localStorage.getItem('spineImage');
-
+      // Checkout セッション作成
       const res = await fetch('/create-checkout-session', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ quantity: qty, musicURL }) // ← Stripeには画像は送らない
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
       });
-
       const { id } = await res.json();
       await stripe.redirectToCheckout({ sessionId: id });
     });

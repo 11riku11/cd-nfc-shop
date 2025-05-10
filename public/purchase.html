@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
@@ -27,7 +27,29 @@
     <section class="order-summary">
       <h2>ご注文内容</h2>
       <div class="preview-grid">
-        <!-- preview items same as before -->
+        <div class="preview-item">
+          <label>ジャケット（表紙）</label>
+          <div class="preview-box cover-preview"><img id="cover-preview" src="" alt="表紙"></div>
+        </div>
+        <div class="preview-item">
+          <label>ブックレット（表紙裏側）</label>
+          <div class="preview-box booklet-preview"><img id="booklet-preview" src="" alt="ブックレット"></div>
+        </div>
+        <div class="preview-item">
+          <label>ディスク</label>
+          <div class="preview-box cd-preview disk-preview-wrapper">
+            <img id="disc-preview" src="" alt="ディスク">
+            <div class="hole-mask"></div>
+          </div>
+        </div>
+        <div class="preview-item">
+          <label>バックインレイ<br>(裏表紙 5cm×3.7cm)</label>
+          <div class="preview-box back-preview"><img id="back-preview" src="" alt="裏表紙"></div>
+        </div>
+        <div class="preview-item">
+          <label>スパイン（背表紙）<br>(0.5cm×3.7cm)</label>
+          <div class="preview-box spine-preview"><img id="spine-preview" src="" alt="背表紙"></div>
+        </div>
       </div>
       <div class="details">
         <p>商品名：CD型NFCキーホルダー</p>
@@ -68,42 +90,42 @@
   </footer>
 
   <script>
-    const stripe = Stripe('pk_live_…');
+    const stripe = Stripe('pk_live_…'); // 必要に応じて公開キーを本番キーに更新
     const unitPrice = 3300;
 
-    // 小計更新
+    // 数量変更で小計を更新
     document.getElementById('quantity').addEventListener('change', e => {
       document.getElementById('subtotal').textContent = unitPrice * e.target.value;
     });
 
-    // プレビュー画像／URL復元
+    // プレビュー画像とURLを復元
     ['cover','booklet','disc','back','spine'].forEach(part => {
-      const img = document.getElementById(`${part}-preview`);
-      if (img) img.src = localStorage.getItem(`${part}Image`) || '';
+      const img = document.getElementById(${part}-preview);
+      if (img) img.src = localStorage.getItem(${part}Image) || '';
     });
     document.getElementById('music-url-input').value = localStorage.getItem('musicURL') || '';
 
-    // 修正: フィールドをID/セレクタで確実に取得
+    // フォーム送信ハンドラ
     document.getElementById('order-form').addEventListener('submit', async e => {
       e.preventDefault();
-      const quantity = document.getElementById('quantity').value;
-      const musicURL = document.getElementById('music-url-input').value;
-      const name     = document.querySelector('#order-form input[name="name"]').value;
-      const email    = document.querySelector('#order-form input[name="email"]').value;
-      const postal   = document.querySelector('#order-form input[name="postal"]').value;
-      const address  = document.querySelector('#order-form input[name="address"]').value;
+      const form = e.target;
+      const data = {
+        quantity:  form.quantity.value,
+        musicURL:  form.musicURL.value
+      };
 
-      localStorage.setItem('quantity',  quantity);
-      localStorage.setItem('musicURL',  musicURL);
-      localStorage.setItem('name',      name);
-      localStorage.setItem('email',     email);
-      localStorage.setItem('postal',    postal);
-      localStorage.setItem('address',   address);
+      // 顧客情報を localStorage に保存
+      localStorage.setItem('email',   form.email.value);
+      localStorage.setItem('name',    form.name.value);
+      localStorage.setItem('postal',  form.postal.value);
+      localStorage.setItem('address', form.address.value);
+      localStorage.setItem('musicURL', form.musicURL.value);
 
+      // Checkout セッション作成
       const res = await fetch('/create-checkout-session', {
         method: 'POST',
-        headers: { 'Content-Type':'application/json' },
-        body: JSON.stringify({ quantity, musicURL })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
       });
       const { id } = await res.json();
       await stripe.redirectToCheckout({ sessionId: id });

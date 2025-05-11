@@ -9,12 +9,6 @@
 <body>
   <header>
     <h1>CD型NFCキーホルダー専門店</h1>
-    <nav>
-      <ul>
-        <li><a href="index.html">トップ</a></li>
-        <li><a href="preview.html">デザインプレビュー</a></li>
-      </ul>
-    </nav>
   </header>
 
   <main>
@@ -23,63 +17,52 @@
       <p>注文番号：<strong>#<span id="order-id"></span></strong></p>
       <p>メールで詳細をお送りしました。</p>
 
-      <!-- 追加：発送先住所入力フォーム -->
       <div class="address-input">
-        <label for="address">発送先住所をご入力ください：</label>
+        <label for="address">発送先住所：</label>
         <textarea id="address" rows="3" placeholder="例：東京都渋谷区〇〇町1-2-3"></textarea>
-        <button id="save-btn" class="btn">住所を保存して完了</button>
+        <button id="save-btn" class="btn">保存してメール送信</button>
       </div>
-
-      <a href="index.html" class="btn">トップに戻る</a>
     </section>
   </main>
 
-  <footer>
-    <p>&copy; 2025 CD NFC キーホルダー専門店</p>
-  </footer>
-
   <script>
-    // 注文番号表示
     const params = new URLSearchParams(location.search);
-    const orderId = params.get('orderId');
-    document.getElementById('order-id').textContent = orderId || '—';
+    const orderId = params.get('orderId') || '';
+    document.getElementById('order-id').textContent = orderId;
 
-    const saveButton = document.getElementById('save-btn');
-    saveButton.addEventListener('click', () => {
+    document.getElementById('save-btn').addEventListener('click', async () => {
       const address = document.getElementById('address').value.trim();
-      if (!address) {
-        alert('発送先住所を入力してください');
-        return;
-      }
+      if (!address) return alert('住所を入力してください');
 
-      // 保存データ
-      const data = {
-        sessionId: orderId,
-        musicURL: localStorage.getItem('musicURL'),
-        coverImage: localStorage.getItem('coverImage'),
+      // localStorage から取得
+      const payload = {
+        sessionId:    orderId,
+        email:        localStorage.getItem('email'),
+        name:         localStorage.getItem('name'),
+        postal:       localStorage.getItem('postal'),
+        address:      address,
+        quantity:     localStorage.getItem('quantity'),
+        musicURL:     localStorage.getItem('musicURL'),
+        coverImage:   localStorage.getItem('coverImage'),
         bookletImage: localStorage.getItem('bookletImage'),
-        discImage: localStorage.getItem('discImage'),
-        backImage: localStorage.getItem('backImage'),
-        spineImage: localStorage.getItem('spineImage'),
-        address: address
+        discImage:    localStorage.getItem('discImage'),
+        backImage:    localStorage.getItem('backImage'),
+        spineImage:   localStorage.getItem('spineImage')
       };
 
-      fetch('/save-images', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      })
-      .then(res => res.json())
-      .then(json => {
+      try {
+        const res = await fetch('/save-images', {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
         console.log('✅ 保存結果:', json);
-        alert('ご住所とデザインを保存しました！');
-        // 任意で localStorage をクリア
-        // localStorage.clear();
-      })
-      .catch(err => {
+        alert('ご注文内容と住所を保存し、確認メールを送信しました！');
+      } catch (err) {
         console.error('❌ 保存エラー:', err);
-        alert('保存に失敗しました。再度お試しください。');
-      });
+        alert('保存またはメール送信に失敗しました。');
+      }
     });
   </script>
 </body>

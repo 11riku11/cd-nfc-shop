@@ -1,0 +1,7 @@
+Session ID: cs_test_a1aIfnEy6jKlJxERE6BvYi6D2pHjbFzGLucv7bPMsG77ykR0x9dg1pCQO4
+Name     : Riku
+Email    : riku.nakagawa.11@gmail.com
+Postal   : 1850035
+Address  : 東京
+Quantity : 1
+MusicURL : https://music.apple.com/jp/album/begin-again-music-from-and-inspired-by-the/1440819079

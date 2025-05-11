@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>購入ページ - CD型NFCキーホルダー</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="https://js.stripe.com/v3/"></script>
+  <script src="https://js.stripe.com/v3/" defer></script>
   <link rel="icon" href="logo.png" type="image/png">
 </head>
 <body>
@@ -29,15 +29,11 @@
       <div class="preview-grid">
         <div class="preview-item">
           <label>ジャケット（表紙）</label>
-          <div class="preview-box cover-preview">
-            <img id="cover-preview" src="" alt="表紙">
-          </div>
+          <div class="preview-box cover-preview"><img id="cover-preview" src="" alt="表紙"></div>
         </div>
         <div class="preview-item">
           <label>ブックレット（表紙裏側）</label>
-          <div class="preview-box booklet-preview">
-            <img id="booklet-preview" src="" alt="ブックレット">
-          </div>
+          <div class="preview-box booklet-preview"><img id="booklet-preview" src="" alt="ブックレット"></div>
         </div>
         <div class="preview-item">
           <label>ディスク</label>
@@ -48,15 +44,11 @@
         </div>
         <div class="preview-item">
           <label>バックインレイ<br>(裏表紙 5cm×3.7cm)</label>
-          <div class="preview-box back-preview">
-            <img id="back-preview" src="" alt="裏表紙">
-          </div>
+          <div class="preview-box back-preview"><img id="back-preview" src="" alt="裏表紙"></div>
         </div>
         <div class="preview-item">
           <label>スパイン（背表紙）<br>(0.5cm×3.7cm)</label>
-          <div class="preview-box spine-preview">
-            <img id="spine-preview" src="" alt="背表紙">
-          </div>
+          <div class="preview-box spine-preview"><img id="spine-preview" src="" alt="背表紙"></div>
         </div>
       </div>
       <div class="details">
@@ -77,24 +69,12 @@
     <section class="customer-info">
       <h2>お客様情報</h2>
       <form id="order-form">
-        <div class="form-group">
-          <label>お名前<input type="text" name="name" required></label>
-        </div>
-        <div class="form-group">
-          <label>メール<input type="email" name="email" required></label>
-        </div>
-        <div class="form-group">
-          <label>郵便番号<input type="text" name="postal" required></label>
-        </div>
-        <div class="form-group">
-          <label>住所<input type="text" name="address" required></label>
-        </div>
-        <div class="form-group">
-          <label>再生ページのURL<input type="url" id="music-url-input" name="musicURL" required placeholder="https://…"></label>
-        </div>
-        <div class="form-group agreement">
-          <label><input type="checkbox" name="agree" required> 入稿データの権利処理はお客様ご自身で行ってください。</label>
-        </div>
+        <div class="form-group"><label>お名前<input type="text" name="name" required></label></div>
+        <div class="form-group"><label>メール<input type="email" name="email" required></label></div>
+        <div class="form-group"><label>郵便番号<input type="text" name="postal" required></label></div>
+        <div class="form-group"><label>住所<input type="text" name="address" required></label></div>
+        <div class="form-group"><label>再生ページのURL<input type="url" id="music-url-input" name="musicURL" required placeholder="https://…"></label></div>
+        <div class="form-group agreement"><label><input type="checkbox" name="agree" required> 入稿データの権利処理はお客様ご自身で行ってください。</label></div>
         <button type="submit" class="btn">支払いへ進む</button>
       </form>
     </section>
@@ -110,63 +90,63 @@
   </footer>
 
   <script>
-    // 本番用公開可能キーに差し替え
-    const stripe = Stripe('pk_test_51RKbkfFzqvisLNqWBdRNgEX9XILAEEd7fFPq3ibiZFr4Gn1lMfmMvf0BigoM2t6o1ilK5RwQldOSZVFIJI5PvFpP00wrshOCVp');
-    const unitPrice = 3300;
+    document.addEventListener('DOMContentLoaded', () => {
+      // Stripe 初期化（テストキーまたは本番キーを設定）
+      const stripe = Stripe('pk_test_51RKbkfFzqvisLNqWBdRNgEX9XILAEEd7fFPq3ibiZFr4Gn1lMfmMvf0BigoM2t6o1ilK5RwQldOSZVFIJI5PvFpP00wrshOCVp');
+      const unitPrice = 3300;
 
-    // 小計の自動更新
-    document.getElementById('quantity').addEventListener('change', e => {
-      document.getElementById('subtotal').textContent = unitPrice * e.target.value;
-    });
+      // 小計更新
+      const quantityEl = document.getElementById('quantity');
+      const subtotalEl = document.getElementById('subtotal');
+      quantityEl.addEventListener('change', e => {
+        subtotalEl.textContent = unitPrice * e.target.value;
+      });
 
-    // プレビュー画像とURLを復元
-    ['cover','booklet','disc','back','spine'].forEach(part => {
-      const img = document.getElementById(`${part}-preview`);
-      const dataUrl = localStorage.getItem(`${part}Image`);
-      if (img && dataUrl) img.src = dataUrl;
-    });
-    const storedUrl = localStorage.getItem('musicURL');
-    if (storedUrl) {
-      document.getElementById('music-url-input').value = storedUrl;
-    }
+      // プレビュー画像復元
+      ['cover','booklet','disc','back','spine'].forEach(part => {
+        const img = document.getElementById(`${part}-preview`);
+        const dataUrl = localStorage.getItem(`${part}Image`);
+        if (img && dataUrl) img.src = dataUrl;
+      });
+      const urlInput = document.getElementById('music-url-input');
+      const storedUrl = localStorage.getItem('musicURL');
+      if (storedUrl) urlInput.value = storedUrl;
 
-    // フォーム送信ハンドラ
-    document.getElementById('order-form').addEventListener('submit', async e => {
-      e.preventDefault();
+      // フォーム送信
+      document.getElementById('order-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        const quantity = quantityEl.value;
+        const musicURL = urlInput.value;
 
-      // 各フィールドを確実に取得
-      const quantity = document.getElementById('quantity').value;
-      const musicURL = document.getElementById('music-url-input').value;
-      const name     = document.querySelector('#order-form input[name="name"]').value;
-      const email    = document.querySelector('#order-form input[name="email"]').value;
-      const postal   = document.querySelector('#order-form input[name="postal"]').value;
-      const address  = document.querySelector('#order-form input[name="address"]').value;
+        // 顧客情報
+        const name    = document.querySelector('input[name="name"]').value;
+        const email   = document.querySelector('input[name="email"]').value;
+        const postal  = document.querySelector('input[name="postal"]').value;
+        const address = document.querySelector('input[name="address"]').value;
 
-      // localStorage に顧客情報を保存（完了画面で使用）
-      localStorage.setItem('quantity', quantity);
-      localStorage.setItem('musicURL', musicURL);
-      localStorage.setItem('name', name);
-      localStorage.setItem('email', email);
-      localStorage.setItem('postal', postal);
-      localStorage.setItem('address', address);
+        // localStorage 保存
+        localStorage.setItem('quantity',  quantity);
+        localStorage.setItem('musicURL',  musicURL);
+        localStorage.setItem('name',      name);
+        localStorage.setItem('email',     email);
+        localStorage.setItem('postal',    postal);
+        localStorage.setItem('address',   address);
 
-      // Checkout セッションを作成
-      try {
-        const res = await fetch('/create-checkout-session', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ quantity, musicURL })
-        });
-        const { id } = await res.json();
-        // Stripe Checkout へリダイレクト
-        const result = await stripe.redirectToCheckout({ sessionId: id });
-        if (result.error) {
-          alert(result.error.message);
+        // Checkout セッション作成
+        try {
+          const res = await fetch('/create-checkout-session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ quantity, musicURL })
+          });
+          const { id } = await res.json();
+          const result = await stripe.redirectToCheckout({ sessionId: id });
+          if (result.error) alert(result.error.message);
+        } catch (err) {
+          console.error('Checkout セッション作成エラー:', err);
+          alert('支払い処理に失敗しました。再度お試しください。');
         }
-      } catch (err) {
-        console.error('Checkout セッション作成エラー:', err);
-        alert('支払い処理に失敗しました。再度お試しください。');
-      }
+      });
     });
   </script>
 </body>

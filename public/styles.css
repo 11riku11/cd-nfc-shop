@@ -305,3 +305,18 @@ a:hover {
 .order-complete .btn {
   margin-top: 16px;
 }
+.description .icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+  background: #007bff;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+

@@ -13,6 +13,10 @@
     "body-parser": "^2.2.0",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "glob": "^11.0.2",
+    "nodemailer": "^7.0.3",
+    "pdfkit": "^0.17.1",
+    "sharp": "^0.34.1",
     "stripe": "^18.1.0"
   },
   "description": ""

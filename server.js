@@ -79,10 +79,13 @@ app.post('/create-checkout-session', async (req, res) => {
         quantity,
       }],
       mode: 'payment',
+      automatic_tax: {
+        enabled: true
+      },
       success_url: `${req.headers.origin}/complete.html?orderId={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.origin}/purchase.html`,
-      metadata: { musicURL }
-    });
+       metadata: { musicURL }
+     });
     res.json({ id: session.id });
   } catch (err) {
     console.error('❌ create-checkout-session error:', err);

@@ -25,45 +25,51 @@
     </section>
   </main>
 
-  <script>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
     const params = new URLSearchParams(location.search);
     const orderId = params.get('orderId') || '';
     document.getElementById('order-id').textContent = orderId;
 
-    document.getElementById('save-btn').addEventListener('click', async () => {
-      const address = document.getElementById('address').value.trim();
-      if (!address) return alert('住所を入力してください');
+    const address = localStorage.getItem('address');
+    if (!address) {
+      alert('住所が保存されていません。');
+      return;
+    }
 
-      // localStorage から取得
-      const payload = {
-        sessionId:    orderId,
-        email:        localStorage.getItem('email'),
-        name:         localStorage.getItem('name'),
-        postal:       localStorage.getItem('postal'),
-        address:      address,
-        quantity:     localStorage.getItem('quantity'),
-        musicURL:     localStorage.getItem('musicURL'),
-        coverImage:   localStorage.getItem('coverImage'),
-        bookletImage: localStorage.getItem('bookletImage'),
-        discImage:    localStorage.getItem('discImage'),
-        backImage:    localStorage.getItem('backImage'),
-        spineImage:   localStorage.getItem('spineImage')
-      };
+    const payload = {
+      sessionId:    orderId,
+      email:        localStorage.getItem('email'),
+      name:         localStorage.getItem('name'),
+      postal:       localStorage.getItem('postal'),
+      address:      address,
+      quantity:     localStorage.getItem('quantity'),
+      musicURL:     localStorage.getItem('musicURL'),
+      coverImage:   localStorage.getItem('coverImage'),
+      bookletImage: localStorage.getItem('bookletImage'),
+      discImage:    localStorage.getItem('discImage'),
+      backImage:    localStorage.getItem('backImage'),
+      spineImage:   localStorage.getItem('spineImage')
+    };
 
-      try {
-        const res = await fetch('/save-images', {
-          method: 'POST',
-          headers: { 'Content-Type':'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const json = await res.json();
-        console.log('✅ 保存結果:', json);
-        alert('ご注文内容と住所を保存し、確認メールを送信しました！');
-      } catch (err) {
-        console.error('❌ 保存エラー:', err);
-        alert('保存またはメール送信に失敗しました。');
-      }
-    });
-  </script>
+    try {
+      const res = await fetch('/save-images', {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const json = await res.json();
+      console.log('✅ 自動保存結果:', json);
+      alert('ご注文内容を保存し、確認メールを送信しました！');
+    } catch (err) {
+      console.error('❌ 自動保存エラー:', err);
+      alert('保存またはメール送信に失敗しました。');
+    }
+    // 自動保存が終わったら localStorage に "saved" を入れる
+localStorage.setItem('saved', '1');
+
+  });
+</script>
+
 </body>
 </html>

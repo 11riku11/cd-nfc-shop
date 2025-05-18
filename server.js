@@ -1,6 +1,8 @@
 // server.js
 
 // ── 環境変数読み込み＆デバッグ ──
+require('dotenv').config(); // ← ★これを追加
+
 const path = require('path');
 
 console.log('Working dir:', process.cwd());
@@ -73,7 +75,7 @@ app.post('/create-checkout-session', async (req, res) => {
         price_data: {
           currency: 'jpy',
           product_data: { name: 'CD型NFCキーホルダー' },
-          unit_amount: 1,
+          unit_amount: 60,
         },
         quantity,
       }],

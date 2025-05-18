@@ -16,6 +16,13 @@ console.log('__dirname:', __dirname);
 console.log('STRIPE_SECRET_KEY:', process.env.STRIPE_SECRET_KEY ? '○OK' : '×NG');
 
 // ── モジュール読み込み ──
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 const express = require('express');
 const fs = require('fs');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
@@ -94,7 +101,7 @@ app.post('/create-checkout-session', async (req, res) => {
 });
 
 // ── 画像＋顧客情報保存 & メール送信 ──
-app.post('/save-images', async (req, res) => {
+ app.post('/save-images', async (req, res) => {
   const {
     sessionId,
     musicURL,
@@ -114,43 +121,40 @@ app.post('/save-images', async (req, res) => {
     return res.status(400).json({ error: 'メール・お名前・住所は必須です' });
   }
 
-  // フォルダ名生成
-  const sanitized = email.replace(/[@.]/g, '_');
-  const timestamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0];
-  const folder = `${sanitized}_${timestamp}`;
-  const dir = path.join(__dirname, 'uploads', folder);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-
-  // 画像保存
-  const saveImage = (dataUrl, filename) => {
-    if (!dataUrl) return;
-    const base64 = dataUrl.replace(/^data:image\/\w+;base64,/, '');
-    fs.writeFileSync(path.join(dir, filename), base64, 'base64');
+  // Cloudinaryに画像をアップロードする関数
+  const uploadImage = async (dataUrl, filename) => {
+    if (!dataUrl) return null;
+    try {
+      const result = await cloudinary.uploader.upload(
+        dataUrl,
+        {
+          folder: `nfc-orders/${email.replace(/[@.]/g, '_')}`,
+          public_id: filename,
+          overwrite: true
+        }
+      );
+      return result.secure_url;
+    } catch (err) {
+      console.error(`❌ Cloudinary upload error (${filename}):`, err);
+      return null;
+    }
   };
-  saveImage(coverImage, 'cover.png');
-  saveImage(bookletImage, 'booklet.png');
-  saveImage(discImage, 'disc.png');
-  saveImage(backImage, 'back.png');
-  saveImage(spineImage, 'spine.png');
 
-  // 顧客詳細をテキストにまとめて保存
-  const details = [
-    `Session ID: ${sessionId}`,
-    `Name     : ${name}`,
-    `Email    : ${email}`,
-    `Postal   : ${postal}`,
-    `Address  : ${address}`,
-    `Quantity : ${quantity}`,
-    `MusicURL : ${musicURL}`
-  ].join('\n');
-  fs.writeFileSync(path.join(dir, 'details.txt'), details, 'utf8');
+  try {
+    const [coverUrl, bookletUrl, discUrl, backUrl, spineUrl] = await Promise.all([
+      uploadImage(coverImage, 'cover'),
+      uploadImage(bookletImage, 'booklet'),
+      uploadImage(discImage, 'disc'),
+      uploadImage(backImage, 'back'),
+      uploadImage(spineImage, 'spine')
+    ]);
 
-  // 注文確認メール送信
-  const mailOptions = {
-    from: process.env.MAIL_USER,
-    to: email,
-    subject: '【CD型NFCキーホルダー】ご注文ありがとうございます',
-    text: `${name} 様
+    // メール送信
+    const mailOptions = {
+      from: process.env.MAIL_USER,
+      to: email,
+      subject: '【CD型NFCキーホルダー】ご注文ありがとうございます',
+      text: `${name} 様
 
 ご注文を承りました。
 
@@ -162,21 +166,29 @@ app.post('/save-images', async (req, res) => {
 ${postal}
 ${address}
 
-添付リンク
+【音楽URL】
 ${musicURL}
+
+【アップロード画像URL】
+- 表紙: ${coverUrl}
+- ブックレット: ${bookletUrl}
+- ディスク: ${discUrl}
+- 裏面: ${backUrl}
+- 背面: ${spineUrl}
 
 商品発送まで今しばらくお待ちください。
 `
-  };
-  try {
+    };
+
     await transporter.sendMail(mailOptions);
-    console.log(`✅ saved & email sent → ${dir}`);
-    res.json({ message: '保存＆メール送信完了', folder });
+    console.log('✅ Cloudinary保存＆メール送信完了');
+    res.json({ message: '保存＆メール送信完了', images: { coverUrl, bookletUrl, discUrl, backUrl, spineUrl } });
   } catch (err) {
-    console.error('❌ email send error:', err);
-    res.status(500).json({ error: 'メール送信に失敗しました' });
+    console.error('❌ 保存またはメール送信失敗:', err);
+    res.status(500).json({ error: '保存またはメール送信に失敗しました' });
   }
 });
+
 
 // ── サーバ起動 ──
 const PORT = process.env.PORT || 3000;

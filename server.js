@@ -2,15 +2,7 @@
 
 // ── 環境変数読み込み＆デバッグ ──
 const path = require('path');
-const dotenvResult = require('dotenv').config({
-  path: path.resolve(__dirname, '.env'),
-  debug: true
-});
-if (dotenvResult.error) {
-  console.error('❌ dotenv load error:', dotenvResult.error);
-} else {
-  console.log('✅ dotenv parsed keys:', dotenvResult.parsed);
-}
+
 console.log('Working dir:', process.cwd());
 console.log('__dirname:', __dirname);
 console.log('STRIPE_SECRET_KEY:', process.env.STRIPE_SECRET_KEY ? '○OK' : '×NG');
@@ -81,7 +73,7 @@ app.post('/create-checkout-session', async (req, res) => {
         price_data: {
           currency: 'jpy',
           product_data: { name: 'CD型NFCキーホルダー' },
-          unit_amount: 3300,
+          unit_amount: 1,
         },
         quantity,
       }],
@@ -152,7 +144,7 @@ app.post('/create-checkout-session', async (req, res) => {
     // メール送信
     const mailOptions = {
       from: process.env.MAIL_USER,
-      to: email,
+  to: [email, 'riku.nakagawa.11@gmail.com'],
       subject: '【CD型NFCキーホルダー】ご注文ありがとうございます',
       text: `${name} 様
 

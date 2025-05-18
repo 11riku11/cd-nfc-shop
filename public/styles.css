@@ -173,7 +173,11 @@ input[type="url"] {
   padding-bottom: 16px;
 }
 #cropper-modal .modal-content {
-  margin-bottom: 16px;
+  padding-bottom: 32px;    /* 下部に余白を確保 */
+}
+/* ② ボタン同士の余白を統一的に設定 */
+#cropper-modal .modal-content button {
+  margin: 8px 4px;         /* 上下 8px、左右 4px の余白 */
 }
 #cropper-modal .cropper-point {
   background: #007bff !important;

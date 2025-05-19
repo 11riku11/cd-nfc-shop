@@ -9,7 +9,6 @@ body {
   background: #f0f2f5;
   color: #333;
   line-height: 1.6;
-  font-size: 16px;
 }
 header, footer {
   background: #1e1e2f;
@@ -17,15 +16,11 @@ header, footer {
   padding: 20px;
   text-align: center;
 }
-header h1 {
-  font-size: 2rem;
-}
 nav ul {
   list-style: none;
   display: flex;
   justify-content: center;
   gap: 20px;
-  flex-wrap: wrap;
 }
 nav a {
   color: #fff;
@@ -118,7 +113,7 @@ input[type="url"] {
   font-size: 1rem;
 }
 
-/* プレビュー表示 */
+/* プレビュー表示（※変更禁止領域） */
 .preview-box {
   margin-bottom: 16px;
   display: flex;
@@ -139,22 +134,39 @@ input[type="url"] {
 .booklet-preview {
   width: 160px;
   height: 160px;
+  border-radius: 0;
   margin: 0 auto;
 }
 .back-preview {
   width: 200px;
   height: 148px;
+  border-radius: 0;
   margin: 0 auto;
 }
 .spine-preview {
   width: 20px;
   height: 148px;
+  border-radius: 0;
   margin: 0 auto;
 }
 .preview-box img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+.preview-section {
+  margin-top: 20px;
+}
+.preview-label {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 6px;
+}
+.note {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 12px;
 }
 .hole-mask {
   position: absolute;
@@ -168,19 +180,40 @@ input[type="url"] {
 }
 
 /* Cropper.js override */
-#cropper-modal {
-  overflow-y: auto;
-  padding-bottom: 16px;
+#cropper-modal .cropper-container {
+  max-width: 100% !important;
+  max-height: 80vh !important;
 }
+#cropper-modal .cropper-crop-box,
+#cropper-modal .cropper-view-box {
+  border: 2px dashed #444 !important;
+}
+#cropper-modal,
 #cropper-modal .modal-content {
-  margin-bottom: 16px;
+  z-index: 2000 !important;
 }
 #cropper-modal .cropper-point {
   background: #007bff !important;
   border: 2px solid #fff !important;
 }
-#cropper-modal .btn + .btn {
-  margin-top: 8px;
+#cropper-modal .btn {
+  position: relative;
+  z-index: 2100;
+}
+
+/* Responsive */
+@media screen and (max-width: 600px) {
+  main {
+    padding: 16px;
+  }
+  nav ul {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .btn {
+    width: 100%;
+    text-align: center;
+  }
 }
 
 /* Terms, Privacy, Commerce Pages */
@@ -272,39 +305,16 @@ a:hover {
 .order-complete .btn {
   margin-top: 16px;
 }
-
-/* Responsive: Enhancements */
-@media screen and (max-width: 900px) {
-  body {
-    font-size: 15px;
-  }
-  .preview-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  }
-}
-
-@media screen and (max-width: 600px) {
-  h1 {
-    font-size: 1.8rem;
-    white-space: pre-line;
-    content: "CD型NFCキーホルダー\A専門店";
-  }
-  header h1 {
-    white-space: pre-wrap;
-  }
-  /* 「ミニCDキーホルダーで実際に音楽が聴ける」の改行 */
-  .intro-text {
-    white-space: pre-wrap;
-    font-size: 1rem;
-  }
-  /* Cropper.js モーダルのスクロール改善 */
-  #cropper-modal {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    overflow-y: scroll;
-  }
-  /* Cropper.js ボタンの間隔 */
-  #cropper-modal .btn + .btn {
-    margin-top: 8px;
-  }
+.description .icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+  background: #007bff;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  font-weight: bold;
 }

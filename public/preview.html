@@ -76,15 +76,7 @@
     .description dd { margin-left: 16px; margin-bottom: 8px; }
     .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
     .modal.active { display: flex !important; }
-.modal-content {
-  background: #fff;
-  padding: 16px 16px 32px;   /* 下に余白を増やす */
-  max-width: 90%;
-  max-height: 90vh;          /* ← ここを必ず 90vh に */
-  overflow-y: auto;          /* 縦スクロールだけ */
-  text-align: center;
-  -webkit-overflow-scrolling: touch; /* 慣性スクロール */
-}
+    .modal-content { background: #fff; padding: 16px; max-width: 90%; max-height: 90%; overflow: auto; text-align: center; }
     /* ディスクのみ円形枠、それ以外は矩形 */
     #cropper-modal[data-part="disc"] .cropper-crop-box,
     #cropper-modal[data-part="disc"] .cropper-view-box { border-radius: 50% !important; }
@@ -114,7 +106,7 @@
   </style>
 </head>
 <body>
-  <header><h1>CD型NFCキーホルダー デザインプレビュー</h1></header>
+  <header><h1>CD型NFCキーホルダー <br class="mobile-only">デザインプレビュー</h1></header>
   <main>
     <button onclick="location.href='index.html'" class="btn back-btn">トップに戻る</button>
 
@@ -191,7 +183,7 @@
         <p class="instructions">ドラッグで移動、マウスホイールまたはピンチでズームできます。</p>
         <img id="cropper-image" style="max-width:100%;" />
         <div style="margin-top:12px;">
-         <button id="crop-save" type="button" class="btn">保存</button>
+          <button id="crop-save" class="btn">保存</button>
           <button id="crop-cancel" class="btn">キャンセル</button>
         </div>
       </div>
@@ -234,30 +226,15 @@
       });
     }
 
-function handleSave() {
-      if (!cropper) return;
-      const canvas = cropper.getCroppedCanvas({ fillColor: '#fff' });
+    document.getElementById('crop-save').addEventListener('click', () => {
+      if(!cropper) return;
+      const canvas = cropper.getCroppedCanvas({ fillColor:'#fff' });
       const dataUrl = canvas.toDataURL('image/png');
       document.getElementById(idMap[currentPart]).src = dataUrl;
       localStorage.setItem(currentPart + 'Image', dataUrl);
-
-      cropper.destroy();
-      cropper = null;
+      cropper.destroy(); cropper = null;
       modal.classList.remove('active');
-      // （必要ならフォールバックで inline-style 非表示も）
-      // modal.style.display = 'none';
-
-      document.getElementById(idMap[currentPart])
-              .scrollIntoView({ behavior: 'smooth' });
-    }
-
-    // ■2. 複数イベントをまとめて登録
-    const saveBtn = document.getElementById('crop-save');
-    ['click', 'touchend', 'pointerup'].forEach(evt => {
-      saveBtn.addEventListener(evt, e => {
-        e.preventDefault();   // ダブル発火やスクロールとの競合を防止
-        handleSave();
-      }, { passive: false });
+      document.getElementById(idMap[currentPart]).scrollIntoView({ behavior:'smooth' });
     });
 
     document.getElementById('crop-cancel').addEventListener('click', () => {

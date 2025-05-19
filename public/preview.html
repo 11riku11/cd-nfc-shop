@@ -76,7 +76,15 @@
     .description dd { margin-left: 16px; margin-bottom: 8px; }
     .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
     .modal.active { display: flex !important; }
-    .modal-content { background: #fff; padding: 16px; max-width: 90%; max-height: 90%; overflow: auto; text-align: center; }
+.modal-content {
+  background: #fff;
+  padding: 16px 16px 32px;   /* 下に余白を増やす */
+  max-width: 90%;
+  max-height: 90vh;          /* ← ここを必ず 90vh に */
+  overflow-y: auto;          /* 縦スクロールだけ */
+  text-align: center;
+  -webkit-overflow-scrolling: touch; /* 慣性スクロール */
+}
     /* ディスクのみ円形枠、それ以外は矩形 */
     #cropper-modal[data-part="disc"] .cropper-crop-box,
     #cropper-modal[data-part="disc"] .cropper-view-box { border-radius: 50% !important; }
@@ -183,7 +191,7 @@
         <p class="instructions">ドラッグで移動、マウスホイールまたはピンチでズームできます。</p>
         <img id="cropper-image" style="max-width:100%;" />
         <div style="margin-top:12px;">
-          <button id="crop-save" class="btn">保存</button>
+         <button id="crop-save" type="button" class="btn">保存</button>
           <button id="crop-cancel" class="btn">キャンセル</button>
         </div>
       </div>

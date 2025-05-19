@@ -308,13 +308,3 @@ a:hover {
     margin-top: 8px;
   }
 }
-/* ③ モバイル専用改行制御 */
-.mobile-only {
-  display: none; /* デフォルトは非表示 */
-}
-
-@media (max-width: 768px) {
-  .mobile-only {
-    display: block; /* 768px 以下では改行として表示 */
-  }
-}

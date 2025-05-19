@@ -226,15 +226,30 @@
       });
     }
 
-    document.getElementById('crop-save').addEventListener('click', () => {
-      if(!cropper) return;
-      const canvas = cropper.getCroppedCanvas({ fillColor:'#fff' });
+function handleSave() {
+      if (!cropper) return;
+      const canvas = cropper.getCroppedCanvas({ fillColor: '#fff' });
       const dataUrl = canvas.toDataURL('image/png');
       document.getElementById(idMap[currentPart]).src = dataUrl;
       localStorage.setItem(currentPart + 'Image', dataUrl);
-      cropper.destroy(); cropper = null;
+
+      cropper.destroy();
+      cropper = null;
       modal.classList.remove('active');
-      document.getElementById(idMap[currentPart]).scrollIntoView({ behavior:'smooth' });
+      // （必要ならフォールバックで inline-style 非表示も）
+      // modal.style.display = 'none';
+
+      document.getElementById(idMap[currentPart])
+              .scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // ■2. 複数イベントをまとめて登録
+    const saveBtn = document.getElementById('crop-save');
+    ['click', 'touchend', 'pointerup'].forEach(evt => {
+      saveBtn.addEventListener(evt, e => {
+        e.preventDefault();   // ダブル発火やスクロールとの競合を防止
+        handleSave();
+      }, { passive: false });
     });
 
     document.getElementById('crop-cancel').addEventListener('click', () => {

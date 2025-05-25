@@ -75,7 +75,7 @@ app.post('/create-checkout-session', async (req, res) => {
         price_data: {
           currency: 'jpy',
           product_data: { name: 'CD型NFCキーホルダー' },
-          unit_amount: 3500,
+          unit_amount: 3300,
         },
         quantity,
       }],
